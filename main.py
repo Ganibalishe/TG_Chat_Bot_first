@@ -29,6 +29,19 @@ def do_help(bot: Bot, update: Update):
     )
 
 
+def do_love(bot: Bot, update: Update):
+    user = update.effective_user
+    if user:
+        name = user.first_name
+    else:
+        name = 'Братишка'
+    bot.send_message(
+        chat_id=update.effective_message.chat_id,
+        text=f'Я давно хотел сказать тебе, {name}...\n'
+             f'Я люблю тебя, {name}...',
+    )
+
+
 def do_time(bot: Bot, update: Update):
     """Узнать серверное время
     """
@@ -51,10 +64,17 @@ def message_handler(bot: Bot, update: Update):
         name = user.first_name
     else:
         name = 'Братишка'
+
     text = update.effective_message.text
     reply_text = f'Прости, {name}, пока я мало что умею... ' \
                  f'\n\nПо этому просто буду тебя дразнить:' \
                  f'\n{text}'
+
+    love_words = ['люблю тебя', 'тебя люблю']
+    for word in love_words:
+        if word in text.lower():
+            reply_text = f'оооооо... я тоже тебя очень люблю, {name}'
+
     bot.send_message(
         chat_id=update.effective_message.chat_id,
         text=reply_text,
@@ -73,9 +93,11 @@ def main():
     start_handler = CommandHandler('start', do_start)
     help_handler = CommandHandler('help', do_help)
     time_handler = CommandHandler('time', do_time)
+    love_handler = CommandHandler('love', do_love)
     handler = MessageHandler(Filters.all, message_handler)
 
     updater.dispatcher.add_handler(start_handler)
+    updater.dispatcher.add_handler(love_handler)
     updater.dispatcher.add_handler(help_handler)
     updater.dispatcher.add_handler(time_handler)
     updater.dispatcher.add_handler(handler)
