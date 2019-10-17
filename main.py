@@ -1,10 +1,13 @@
 from subprocess import Popen
 from subprocess import PIPE
+import logging
 
 from telegram import *
 from telegram.ext import *
 from config import TG_TOKEN
 from config import TG_API_URL
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def do_start(bot: Bot, update: Update):
@@ -27,6 +30,10 @@ def do_help(bot: Bot, update: Update):
              'Список доступных команд есть в меню \n'
              'И пожалуйста, не стоит на меня материться...',
     )
+
+
+def unknown_commands(bot: Bot, update: Update):
+    bot.send_message(chat_id=update.effective_chat.id, text="Простите, таких команд я не знаю...")
 
 
 def do_love(bot: Bot, update: Update):
@@ -94,12 +101,14 @@ def main():
     help_handler = CommandHandler('help', do_help)
     time_handler = CommandHandler('time', do_time)
     love_handler = CommandHandler('love', do_love)
+    unknown_handler = MessageHandler(Filters.command, unknown_commands)
     handler = MessageHandler(Filters.all, message_handler)
 
     updater.dispatcher.add_handler(start_handler)
     updater.dispatcher.add_handler(love_handler)
     updater.dispatcher.add_handler(help_handler)
     updater.dispatcher.add_handler(time_handler)
+    updater.dispatcher.add_handler(unknown_handler)
     updater.dispatcher.add_handler(handler)
 
     updater.start_polling()
